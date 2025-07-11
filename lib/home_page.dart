@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inventory_mng_system/add_product_screen.dart';
+import 'package:inventory_mng_system/product_list_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -25,7 +26,15 @@ class HomePage extends StatelessWidget {
                 ),
                );
               },
-              child: Text("Add product"))
+              child: Text("Add product")),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => const ProductListScreen()),
+                    );
+                }, 
+                child: Text("View products"))
             ],
         ),
       ),
