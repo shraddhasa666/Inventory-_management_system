@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class ProductListScreen extends StatelessWidget {
+class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
 
+  @override
+  State<ProductListScreen> createState() => _ProductListScreenState();
+}
+
+class _ProductListScreenState extends State<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,6 +50,12 @@ class ProductListScreen extends StatelessWidget {
                   ),
                   title: Text(product['name']),
                   subtitle: Text("${product['category']} • ₹${product['price']}"),
+
+                  trailing: IconButton(
+                    onPressed: (){
+                      _deleteProduct(products[index].id);
+                    }, 
+                    icon: Icon(Icons.delete, color: Colors.red,)),
                 ),
               );
             },
@@ -52,5 +63,17 @@ class ProductListScreen extends StatelessWidget {
         }
         ),
     );
+  }
+  void _deleteProduct(String id) async {
+    try{
+      await FirebaseFirestore.instance.collection('products').doc(id).delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Product deleted")),
+        );
+    } catch (e){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to delete product: $e")),
+        );
+    }
   }
 }
