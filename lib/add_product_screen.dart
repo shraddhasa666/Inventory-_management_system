@@ -11,7 +11,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  
+  final List<String> _categories=[
+  'Tops',
+  'Bottoms',
+  'Shoes',
+  'Bags',
+  'Jewelry',
+  'Accessories',
+  ];
+  String? _selectedCategory;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,8 +62,30 @@ class _AddProductScreenState extends State<AddProductScreen> {
             hintText: "Enter price",
            ),
           ),
+          SizedBox(height: 16),
+          Text("Category"),
+          SizedBox(height: 8,),
+          DropdownButtonFormField<String>(
+            value: _selectedCategory,
+            items: _categories.map((category){
+              return DropdownMenuItem<String>(
+                value: category,
+                child: Text(category),
+                );
+            }).toList(), 
+            onChanged: (value){
+              setState(() {
+                _selectedCategory = value;
+              });
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: "Select a category",
+            ),
+            )
           ],
-        ),),
+        ),
+        ),
     );
   }
 }
