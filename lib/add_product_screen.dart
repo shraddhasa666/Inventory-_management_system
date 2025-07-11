@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:html' as html; // only for web image preview (safe fallback)
@@ -32,6 +33,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       appBar: AppBar(
         title: Text("Add Product"),
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -46,6 +48,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 hintText: "Enter product name"
               ),
             ),
+
             SizedBox(height: 16),
             Text("Quantity"),
             SizedBox(height: 8,),
@@ -57,17 +60,19 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 hintText: "Enter Quantity",
               ),
             ),
+
             SizedBox(height: 16),
-        Text("Price"),
-        SizedBox(height: 8),
-        TextField(
-          controller: _priceController,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: "Enter price",
-           ),
-          ),
+            Text("Price"),
+            SizedBox(height: 8),
+            TextField(
+              controller: _priceController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: "Enter price",
+               ),
+              ),
+
           SizedBox(height: 16),
           Text("Category"),
           SizedBox(height: 8,),
@@ -89,6 +94,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               hintText: "Select a category",
             ),
             ),
+
           SizedBox(height: 16),
           Text("Product Image"),
           SizedBox(height: 8),
@@ -108,10 +114,54 @@ class _AddProductScreenState extends State<AddProductScreen> {
              Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Image.network(_pickedImage!.path, height: 100,),
+             ),
+
+             SizedBox(height: 24),
+             Center(
+              child: ElevatedButton(
+                onPressed: _saveProduct, 
+                child: Text("Save product")),
              )
           ],
         ),
         ),
     );
+  }
+  void _saveProduct() async{
+    if(_nameController.text.isEmpty || _quantityController.text.isEmpty || _priceController.text.isEmpty ||
+    _selectedCategory == null){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please fill all fields")),
+        );
+        return;
+    }
+    String imageUrl = "https://via.placeholder.com/150";
+
+    try{
+      await FirebaseFirestore.instance.collection('products').add({
+        'name': _nameController.text.trim(),
+        'quantity': int.parse(_quantityController.text.trim()),
+        'price': double.parse(_priceController.text.trim()),
+        'category' : _selectedCategory,
+        'imageUrl' : imageUrl,
+        'timestamp' : Timestamp.now(),
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Product saved successfully")),
+        );
+
+        _nameController.clear();
+        _quantityController.clear();
+        _priceController.clear();
+        setState(() {
+          _selectedCategory = null;
+          _pickedImage = null;
+        });
+    } catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error saving product : $e")),
+        );
+    }
+
   }
 }
