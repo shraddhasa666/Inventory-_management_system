@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:html' as html; // only for web image preview (safe fallback)
+
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -20,6 +23,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
   'Accessories',
   ];
   String? _selectedCategory;
+  XFile? _pickedImage;
+  final ImagePicker _picker = ImagePicker();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,7 +88,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
               border: OutlineInputBorder(),
               hintText: "Select a category",
             ),
-            )
+            ),
+          SizedBox(height: 16),
+          Text("Product Image"),
+          SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: () async {
+              final picked=await _picker.pickImage(
+                source: ImageSource.gallery);
+                if(picked != null) {
+                  setState(() {
+                    _pickedImage=picked;
+                  });
+                }
+            }, 
+            child: Text("Pick image"),
+            ),
+            if(_pickedImage != null)
+             Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Image.network(_pickedImage!.path, height: 100,),
+             )
           ],
         ),
         ),
