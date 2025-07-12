@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:inventory_mng_system/edit_product_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -56,6 +57,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       _deleteProduct(products[index].id);
                     }, 
                     icon: Icon(Icons.delete, color: Colors.red,)),
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context)=> EditProductScreen(
+                            productId: products[index].id,
+                            productData: product,
+                          ),
+                          ),
+                        );
+                    },
                 ),
               );
             },
