@@ -37,6 +37,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
             itemCount: products.length,
             itemBuilder: (context, index){
               final product =products[index].data() as Map<String , dynamic>;
+              final timestamp = product['timestamp'] as Timestamp;
+              final formattedDate = DateTime.fromMillisecondsSinceEpoch(
+              timestamp.millisecondsSinceEpoch,
+              );
 
               return Card(
                 margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -54,6 +58,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("${product['category']} • ₹${product['price']}"),
+                      Text(
+                        "Added on: ${formattedDate.day}/${formattedDate.month}/${formattedDate.year}"
+                        "${formattedDate.hour}:${formattedDate.minute.toString().padLeft(2,'0')}",
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
                       if(product['quantity']<5)
                       Text("Low stock: Only ${product['quantity']} left",
                       style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
