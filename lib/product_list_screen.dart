@@ -50,7 +50,16 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     Icon(Icons.image_not_supported),
                   ),
                   title: Text(product['name']),
-                  subtitle: Text("${product['category']} • ₹${product['price']}"),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("${product['category']} • ₹${product['price']}"),
+                      if(product['quantity']<5)
+                      Text("Low stock: Only ${product['quantity']} left",
+                      style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
 
                   trailing: IconButton(
                     onPressed: (){
