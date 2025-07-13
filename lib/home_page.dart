@@ -10,13 +10,14 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xFFFFF1E6),
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 124, 59, 80),
         title: Text("Inventory Manager",
         style: TextStyle(
           fontSize: 26,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.5,
           fontFamily: 'Georgia',
-          color: const Color.fromARGB(255, 91, 48, 81),
+          color: Colors.white,
         ),
         ),
         centerTitle: true,
@@ -32,7 +33,7 @@ class HomePage extends StatelessWidget {
                   fontSize: 28,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Georgia',
-                  color: const Color.fromARGB(255, 30, 5, 74),
+                  color: const Color.fromARGB(255, 126, 57, 79),
                 ),
                 ),
               SizedBox(height: 20,),

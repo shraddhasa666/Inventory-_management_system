@@ -31,7 +31,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Product"),
+        backgroundColor: const Color.fromARGB(255, 124, 59, 80),
+        title: Text("Add Product",
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),),
+        centerTitle: true,
       ),
 
       body: Padding(
@@ -40,25 +47,31 @@ class _AddProductScreenState extends State<AddProductScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("Product name"),
-            SizedBox(height: 8,),
+            SizedBox(height: 6,),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: "Enter product name"
+                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12), // 👈 Shrinks height
+                hintText: "Enter product name",
+                hintStyle: TextStyle(fontSize: 14),
               ),
+              style: TextStyle(fontSize: 14),
             ),
 
             SizedBox(height: 16),
             Text("Quantity"),
-            SizedBox(height: 8,),
+            SizedBox(height: 6,),
             TextField(
               controller: _quantityController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                 border: OutlineInputBorder(),
                 hintText: "Enter Quantity",
+                hintStyle: TextStyle(fontSize: 14),
               ),
+              style: TextStyle(fontSize: 14),
             ),
 
             SizedBox(height: 16),
@@ -69,13 +82,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12), // 👈 Shrinks height
+                hintStyle: TextStyle(fontSize: 14),               
                 hintText: "Enter price",
                ),
+               style: TextStyle(fontSize: 14),
               ),
 
           SizedBox(height: 16),
           Text("Category"),
-          SizedBox(height: 8,),
+          SizedBox(height: 6,),
           DropdownButtonFormField<String>(
             value: _selectedCategory,
             items: _categories.map((category){
@@ -90,26 +106,36 @@ class _AddProductScreenState extends State<AddProductScreen> {
               });
             },
             decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: "Select a category",
-            ),
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12), // 👈 Shrinks height
+                hintStyle: TextStyle(fontSize: 14),               
+                hintText: "Enter price",
+               ),
+               style: TextStyle(fontSize: 14),
             ),
 
           SizedBox(height: 16),
           Text("Product Image"),
           SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () async {
-              final picked=await _picker.pickImage(
-                source: ImageSource.gallery);
-                if(picked != null) {
-                  setState(() {
-                    _pickedImage=picked;
-                  });
-                }
-            }, 
-            child: Text("Pick image"),
-            ),
+          SizedBox(
+            width: MediaQuery.of(context).size.width*0.25,
+            child: ElevatedButton(
+              onPressed: () async {
+                final picked=await _picker.pickImage(
+                  source: ImageSource.gallery);
+                  if(picked != null) {
+                    setState(() {
+                      _pickedImage=picked;
+                    });
+                  }
+              }, 
+              child: Text("Pick image"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange[200],
+                foregroundColor: Colors.white,
+              ),
+              ),
+          ),
             if(_pickedImage != null)
              Padding(
               padding: const EdgeInsets.only(top: 8.0),
@@ -118,9 +144,24 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
              SizedBox(height: 24),
              Center(
-              child: ElevatedButton(
-                onPressed: _saveProduct, 
-                child: Text("Save product")),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width*0.25,
+                child: ElevatedButton(
+                  onPressed: _saveProduct, 
+                  child: Text("Save product"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange[200],
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    textStyle: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      )
+                  ),),
+              ),
              )
           ],
         ),
