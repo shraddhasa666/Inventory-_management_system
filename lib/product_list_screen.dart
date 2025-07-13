@@ -14,7 +14,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Product list"),
+        backgroundColor: const Color.fromARGB(255, 124, 59, 80),
+        title: Text("Product list",
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+          ),
       ),
 
       body: StreamBuilder <QuerySnapshot> (
@@ -47,11 +54,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 child: ListTile(
                   leading: Image.network(
                     product['imageUrl'],
-                    height: 50,
-                    width: 50,
+                    height: 190,
+                    width: 190,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, StackTrace) =>
-                    Icon(Icons.image_not_supported),
+                    Icon(Icons.image_not_supported, size: 50),
                   ),
                   title: Text(product['name']),
                   subtitle: Column(

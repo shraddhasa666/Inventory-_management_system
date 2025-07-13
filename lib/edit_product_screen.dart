@@ -44,7 +44,14 @@ final List<String> _categories=[
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit product"),
+        backgroundColor: const Color.fromARGB(255, 124, 59, 80),
+        title: Text("Edit Product",
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -55,6 +62,7 @@ final List<String> _categories=[
               decoration: InputDecoration(
                 labelText: "Product name",
                 border: OutlineInputBorder(),
+                labelStyle: TextStyle(fontSize: 14),
               ),
             ),
             SizedBox(height: 12),
@@ -64,6 +72,7 @@ final List<String> _categories=[
               decoration: InputDecoration(
                 labelText: "Quantity",
                 border: OutlineInputBorder(),
+                labelStyle: TextStyle(fontSize: 14),
               ),
             ),
             SizedBox(height: 12),
@@ -73,6 +82,7 @@ final List<String> _categories=[
               decoration: InputDecoration(
                 labelText: "price",
                 border: OutlineInputBorder(),
+                labelStyle: TextStyle(fontSize: 14),
               ),
             ),
             SizedBox(height: 12),
@@ -95,10 +105,17 @@ final List<String> _categories=[
                ),
                ),
                SizedBox(height: 24),
-               ElevatedButton(
-                onPressed: _updateProduct, 
-                child: Text("Update product"),
-                )
+               SizedBox(
+                width: MediaQuery.of(context).size.width*0.25,
+                 child: ElevatedButton(
+                  onPressed: _updateProduct, 
+                  child: Text("Update product"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange[200],
+                    foregroundColor: Colors.white,
+                  ),
+                  ),
+               )
           ],
         ),
         ),
