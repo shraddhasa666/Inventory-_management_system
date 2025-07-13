@@ -8,33 +8,75 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFFFF1E6),
       appBar: AppBar(
-        title: Text("INventory app"),
+        title: Text("Inventory Manager",
+        style: TextStyle(
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.5,
+          fontFamily: 'Georgia',
+          color: const Color.fromARGB(255, 91, 48, 81),
+        ),
+        ),
         centerTitle: true,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Welcome to inventory app"),
-              SizedBox(height: 20,),
-              ElevatedButton(
-              onPressed: (){
-               Navigator.push(context, 
-               MaterialPageRoute(
-                builder: (context)=>AddProductScreen(),
+              Text(
+                "Welcome to Inventory App",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Georgia',
+                  color: const Color.fromARGB(255, 30, 5, 74),
                 ),
-               );
-              },
-              child: Text("Add product")),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => const ProductListScreen()),
-                    );
-                }, 
-                child: Text("View products"))
+                ),
+              SizedBox(height: 20,),
+              SizedBox(
+                width: MediaQuery.of(context).size.width*0.25,
+                child: ElevatedButton(
+                onPressed: (){
+                 Navigator.push(context, 
+                 MaterialPageRoute(
+                  builder: (context)=>AddProductScreen(),
+                  ),
+                 );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 251, 154, 124),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.circular(12),
+                  )
+                ),
+                child: Text("Add product")),
+              ),
+
+              SizedBox(height: 20),
+              SizedBox(
+                width: MediaQuery.of(context).size.width*0.25,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (context) => const ProductListScreen()),
+                      );
+                  }, 
+                  style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 251, 154, 124),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.circular(12),
+                  )
+                  ),
+                  child: Text("View products")),
+              )
             ],
         ),
       ),
