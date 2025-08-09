@@ -1,144 +1,122 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class EditProductScreen extends StatefulWidget {
   final String productId;
-  final Map <String , dynamic> productData;
-  
+  final String initialName;
+  final int initialQuantity;
+  final double initialPrice;
+
   const EditProductScreen({
     super.key,
-    required this.productData,
     required this.productId,
-    });
+    required this.initialName,
+    required this.initialQuantity,
+    required this.initialPrice,
+  });
 
   @override
   State<EditProductScreen> createState() => _EditProductScreenState();
 }
 
 class _EditProductScreenState extends State<EditProductScreen> {
-late TextEditingController _nameController;
-late TextEditingController _quantityController;
-late TextEditingController _priceController;
-String? _selectedCategory;
-
-final List<String> _categories=[
-  'Tops',
-  'Bottoms',
-  'Shoes',
-  'Bags',
-  'Jewelry',
-  'Accessories',
-  ];
-
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController nameController;
+  late TextEditingController quantityController;
+  late TextEditingController priceController;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.productData['name']);
-    _quantityController = TextEditingController(text: widget.productData['quantity'].toString());
-    _priceController = TextEditingController(text: widget.productData['price'].toString());
-    _selectedCategory = widget.productData['category'];
+    nameController = TextEditingController(text: widget.initialName);
+    quantityController = TextEditingController(text: widget.initialQuantity.toString());
+    priceController = TextEditingController(text: widget.initialPrice.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 124, 59, 80),
-        title: Text("Edit Product",
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+        backgroundColor: Color(0xFFFF7F50),
+        title: Text(
+          "Edit Product",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        ),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: "Product name",
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(fontSize: 14),
-              ),
-            ),
-            SizedBox(height: 12),
-            TextField(
-              controller: _quantityController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: "Quantity",
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(fontSize: 14),
-              ),
-            ),
-            SizedBox(height: 12),
-            TextField(
-              controller: _priceController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: "price",
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(fontSize: 14),
-              ),
-            ),
-            SizedBox(height: 12),
-            DropdownButtonFormField <String> (
-              value: _selectedCategory,
-              items: _categories.map((category){
-                return DropdownMenuItem <String> (
-                  value: category,
-                  child: Text(category),
-                  );
-              }).toList(),
-               onChanged: (value){
-                setState(() {
-                  _selectedCategory = value;
-                });
-               },
-               decoration: InputDecoration(
-                labelText: "Category",
-                border: OutlineInputBorder(),
-               ),
-               ),
-               SizedBox(height: 24),
-               SizedBox(
-                width: MediaQuery.of(context).size.width*0.25,
-                 child: ElevatedButton(
-                  onPressed: _updateProduct, 
-                  child: Text("Update product"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepOrange[200],
-                    foregroundColor: Colors.white,
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              _buildTextField(nameController, "Product Name", Icons.shopping_bag),
+              SizedBox(height: 15),
+              _buildTextField(quantityController, "Quantity", Icons.confirmation_number, isNumber: true),
+              SizedBox(height: 15),
+              _buildTextField(priceController, "Price", Icons.currency_rupee, isNumber: true),
+              SizedBox(height: 25),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFFF7F50),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          // Update product logic
+                        }
+                      },
+                      child: Text(
+                        "Save Changes",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
                   ),
+                  SizedBox(width: 15),
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.red, width: 2),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        // Delete product logic
+                      },
+                      child: Text(
+                        "Delete",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                      ),
+                    ),
                   ),
-               )
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
-        ),
+      ),
     );
   }
-  void _updateProduct() async {
-    try{
-      await FirebaseFirestore.instance.collection('products').doc(widget.productId).update({
-        'name': _nameController.text.trim(),
-        'quantity': int.parse(_quantityController.text.trim()),
-        'price': double.parse(_priceController.text.trim()),
-        'category': _selectedCategory,
-      });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Product updated sccessfully")),
-        );
-        Navigator.pop(context);
-    }
-    catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to update product: $e")),
-        );
-    }
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {bool isNumber = false}) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Color(0xFFFF7F50)),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFFFF7F50), width: 2),
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      validator: (value) => value!.isEmpty ? "Please enter $label" : null,
+    );
   }
 }
