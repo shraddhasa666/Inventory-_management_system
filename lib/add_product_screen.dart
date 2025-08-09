@@ -1,8 +1,8 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
-
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -15,194 +15,171 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  final List<String> _categories=[
-  'Tops',
-  'Bottoms',
-  'Shoes',
-  'Bags',
-  'Jewelry',
-  'Accessories',
-  ];
-  String? _selectedCategory;
-  XFile? _pickedImage;
+
+  File? _pickedImage;
   final ImagePicker _picker = ImagePicker();
+  bool _isSaving = false;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 124, 59, 80),
-        title: Text("Add Product",
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),),
-        centerTitle: true,
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Product name"),
-            SizedBox(height: 6,),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12), // 👈 Shrinks height
-                hintText: "Enter product name",
-                hintStyle: TextStyle(fontSize: 14),
-              ),
-              style: TextStyle(fontSize: 14),
-            ),
-
-            SizedBox(height: 16),
-            Text("Quantity"),
-            SizedBox(height: 6,),
-            TextField(
-              controller: _quantityController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                border: OutlineInputBorder(),
-                hintText: "Enter Quantity",
-                hintStyle: TextStyle(fontSize: 14),
-              ),
-              style: TextStyle(fontSize: 14),
-            ),
-
-            SizedBox(height: 16),
-            Text("Price"),
-            SizedBox(height: 8),
-            TextField(
-              controller: _priceController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12), // 👈 Shrinks height
-                hintStyle: TextStyle(fontSize: 14),               
-                hintText: "Enter price",
-               ),
-               style: TextStyle(fontSize: 14),
-              ),
-
-          SizedBox(height: 16),
-          Text("Category"),
-          SizedBox(height: 6,),
-          DropdownButtonFormField<String>(
-            value: _selectedCategory,
-            items: _categories.map((category){
-              return DropdownMenuItem<String>(
-                value: category,
-                child: Text(category),
-                );
-            }).toList(), 
-            onChanged: (value){
-              setState(() {
-                _selectedCategory = value;
-              });
-            },
-            decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 12), // 👈 Shrinks height
-                hintStyle: TextStyle(fontSize: 14),               
-                hintText: "Enter price",
-               ),
-               style: TextStyle(fontSize: 14),
-            ),
-
-          SizedBox(height: 16),
-          Text("Product Image"),
-          SizedBox(height: 8),
-          SizedBox(
-            width: MediaQuery.of(context).size.width*0.25,
-            child: ElevatedButton(
-              onPressed: () async {
-                final picked=await _picker.pickImage(
-                  source: ImageSource.gallery);
-                  if(picked != null) {
-                    setState(() {
-                      _pickedImage=picked;
-                    });
-                  }
-              }, 
-              child: Text("Pick image"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange[200],
-                foregroundColor: Colors.white,
-              ),
-              ),
-          ),
-            if(_pickedImage != null)
-             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Image.network(_pickedImage!.path, height: 100,),
-             ),
-
-             SizedBox(height: 24),
-             Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width*0.25,
-                child: ElevatedButton(
-                  onPressed: _saveProduct, 
-                  child: Text("Save product"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepOrange[200],
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    textStyle: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      )
-                  ),),
-              ),
-             )
-          ],
-        ),
-        ),
-    );
-  }
-  void _saveProduct() async{
-    if(_nameController.text.isEmpty || _quantityController.text.isEmpty || _priceController.text.isEmpty ||
-    _selectedCategory == null){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please fill all fields")),
-        );
-        return;
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _pickedImage = File(pickedFile.path);
+      });
     }
-    String imageUrl = "https://via.placeholder.com/150";
+  }
 
-    try{
+  Future<void> _saveProduct() async {
+    if (_nameController.text.isEmpty ||
+        _quantityController.text.isEmpty ||
+        _priceController.text.isEmpty ||
+        _pickedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please fill all fields and pick an image")),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      // Upload image to Firebase Storage
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child("product_images")
+          .child("${DateTime.now().millisecondsSinceEpoch}.jpg");
+
+      await storageRef.putFile(_pickedImage!);
+      String imageUrl = await storageRef.getDownloadURL();
+
+      // Save product details in Firestore
       await FirebaseFirestore.instance.collection('products').add({
         'name': _nameController.text.trim(),
         'quantity': int.parse(_quantityController.text.trim()),
         'price': double.parse(_priceController.text.trim()),
-        'category' : _selectedCategory,
-        'imageUrl' : imageUrl,
-        'timestamp' : Timestamp.now(),
+        'imageUrl': imageUrl,
+        'timestamp': Timestamp.now(),
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Product saved successfully")),
-        );
 
-        _nameController.clear();
-        _quantityController.clear();
-        _priceController.clear();
-        setState(() {
-          _selectedCategory = null;
-          _pickedImage = null;
-        });
-    } catch(e){
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error saving product : $e")),
-        );
+        SnackBar(content: Text("Product added successfully")),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error saving product: $e")),
+      );
+    } finally {
+      setState(() {
+        _isSaving = false;
+      });
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Color(0xFFFF7F50),
+        title: Text(
+          "Add Product",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            _buildTextField("Product Name", _nameController, Icons.shopping_bag),
+            const SizedBox(height: 15),
+            _buildTextField("Quantity", _quantityController, Icons.confirmation_num, keyboardType: TextInputType.number),
+            const SizedBox(height: 15),
+            _buildTextField("Price", _priceController, Icons.currency_rupee, keyboardType: TextInputType.number),
+            const SizedBox(height: 20),
+
+            // Image picker button
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                height: 150,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: _pickedImage == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_a_photo, color: Color(0xFFFF7F50), size: 40),
+                          SizedBox(height: 8),
+                          Text("Tap to add product image", style: TextStyle(color: Colors.grey[600])),
+                        ],
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.file(_pickedImage!, fit: BoxFit.cover, width: double.infinity),
+                      ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : _saveProduct,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFFF7F50),
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 3,
+                ),
+                child: _isSaving
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        "Save Product",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller, IconData icon, {TextInputType? keyboardType}) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType ?? TextInputType.text,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Color(0xFFFF7F50)),
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.grey[700]),
+        filled: true,
+        fillColor: Colors.grey[100],
+        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
   }
 }
